@@ -1,0 +1,135 @@
+
+BLOCK DIAGRAMS 
+==============
+
+
+
+EXTENSION A — RATE LIMITING
+---------------------------
+
+
+Client Request
+      |
+      v
+FastAPI Middleware (Rate Limiter)
+      |
+      v
+In-memory Store (IP → request timestamps)
+      |
+      +----------------------+
+      |                      |
+      v                      v
+Within limit         Exceeded limit
+      |                      |
+      v                      v
+Continue API        Return 429 Response
+                     + Retry-After Header
+
+
+
+
+
+EXTENSION B — CORRELATION ID PROPAGATION
+-----------------------------------------
+
+
+Client Request (X-Correlation-Id optional)
+      |
+      v
+Middleware (Extract / Generate CID)
+      |
+      v
+Store in ContextVar
+      |
+      v
+API Processing Layer
+      |
+      v
+Outbound HTTP Call (httpx client)
+      |
+      v
+Inject X-Correlation-Id Header
+      |
+      v
+Downstream Service Response
+
+
+
+
+
+EXTENSION C — PROMETHEUS METRICS
+----------------------------------
+Client Request
+      |
+      v
+FastAPI Endpoint
+      |
+      v
+Metrics Middleware
+      |
+      +---------------------------+
+      |                           |
+      v                           v
+Histogram (Payment Amount)   Counter (Errors)
+      |
+      v
+/metrics Endpoint Exposed
+      |
+      v
+Prometheus Scrapes Data
+      |
+      v
+Grafana Dashboard Visualization
+
+
+
+
+
+EXTENSION D — STRUCTURED LOGGING
+---------------------------------
+Client Request
+      |
+      v
+FastAPI Middleware
+      |
+      v
+Process Request
+      |
+      v
+Collect:
+- path
+- status
+- latency
+- correlation_id
+      |
+      v
+JSON Logger (app_logs.jsonl)
+      |
+      v
+Log Storage File
+      |
+      v
+Log Analysis (slow requests > 200ms)
+
+
+
+
+
+
+COMBINED ARCHITECTURE OVERVIEW
+-------------------------------
+Client
+  |
+  v
+FastAPI Middleware Layer
+  |---- Rate Limiting (A)
+  |---- Correlation ID (B)
+  |---- Metrics (C)
+  |---- Logging (D)
+  |
+  v
+API Response
+  |
+  +--> /metrics -> Prometheus -> Grafana
+  |
+  +--> logs.jsonl -> Log analysis
