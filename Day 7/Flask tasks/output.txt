@@ -1,0 +1,52 @@
+(.venv) PS C:\Users\Administrator\Learnings\ai-training\Day 7\Flask tasks> python run.py
+ * Serving Flask app 'src.app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a productionstead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.19.16.176:8080
+
+
+
+(.venv) PS C:\Users\Administrator\Learnings\ai-training\Day 7\Flask tasks> curl http://127.0.0.1:8080/api/v1/health                                                                             
+                                                                                                
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {
+                      "status": "healthy"
+                    }
+
+
+
+
+(.venv) PS C:\Users\Administrator\Learnings\ai-training\Day 7\Flask tasks> curl -Method POST `  
+>> -Uri "http://127.0.0.1:8080/api/v1/predictions" `
+>> -ContentType "application/json" `
+>> -Body '{"age":25,"salary":70000}'
+
+
+StatusCode        : 201
+StatusDescription : CREATED
+Content           : {
+                      "id": "a6dcd8bd-5924-46c7-9225-632c0b385895",
+                      "prediction": "approved"
+                    }
+                    
+RawContent        : HTTP/1.1 201 CREATED
+                    Connection: close
+                    Content-Length: 79
+                    Content-Type: application/json
+                    Date: Wed, 10 Jun 2026 08:47:15 GMT
+                    Server: Werkzeug/3.1.8 Python/3.14.5
+                    
+                    {
+                      "id": "a6dcd8bd-5924-46c7-...
+Forms             : {}
+Headers           : {[Connection, close], [Content-Length, 79], [Content-Type, 
+                    application/json], [Date, Wed, 10 Jun 2026 08:47:15 GMT]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 79
