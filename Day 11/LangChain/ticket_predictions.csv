@@ -1,0 +1,11 @@
+ticket,ground_truth,prediction
+I was charged twice for my subscription,Billing,Billing
+Unable to login after password reset,Tech,Tech
+Please refund my annual plan,Refund,Refund
+What are your support timings,General,General
+Legal complaint regarding data misuse,Escalate,Escalate
+Invoice amount is incorrect,Billing,Billing
+Password reset link not working,Tech,Tech
+Need refund for cancelled order,Refund,Refund
+How can I update my profile,General,General
+Security breach reported,Escalate,Escalate
