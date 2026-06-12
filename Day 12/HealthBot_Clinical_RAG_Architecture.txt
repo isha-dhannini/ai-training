@@ -1,0 +1,116 @@
+HealthBot: Clinical RAG at Enterprise Scale
+-------------------------------------------
+
+
+Block Diagram :
+----------------
+[Clinical Documents]
+        │
+        ▼
+[Document Processing Pipeline]
+(PDF → Text → Chunking → Metadata)
+        │
+        ▼
+[Embedding Model]
+(Azure OpenAI Embeddings)
+        │
+        ▼
+[Azure AI Search]
+(Hybrid Retrieval)
+        │
+        ▼
+[Retriever / Re-ranking]
+        │
+        ▼
+[LLM Layer]
+(Claude / GPT)
+        │
+        ▼
+[Answer + Citations]
+        │
+        ▼
+[Clinician Portal]
+
+Clinical Documents (2M+ pages)
+        │
+        ▼
+Document Processing Pipeline (PDF → Text → Chunking → Metadata)
+        │
+        ▼
+Embedding Model (Azure OpenAI Embeddings)
+        │
+        ▼
+Azure AI Search (Hybrid Search)
+        │
+        ▼
+Retriever
+        │
+        ▼
+LLM Layer (Claude / GPT / Azure OpenAI)
+        │
+        ▼
+Answer + Citations
+        │
+        ▼
+Clinician Portal
+
+
+
+Architecture Decisions:
+-----------------------
+
+1. Azure AI Search vs Weaviate on AKS
+   - Recommendation: Azure AI Search (Hybrid)
+     - Fully Azure-native → easier HIPAA compliance
+     - Managed service → lower operational risk
+     - Hybrid search (BM25 + Vector + Semantic) → better for clinical terminology
+   - Weaviate on AKS:
+     - Pros: Flexible, customizable
+     - Cons: Compliance burden, operational overhead
+
+2. Chunk Size: 256 vs 1024 tokens
+   - Recommended: 512–768 tokens with 150-token overlap
+     - Preserves tables and dosage instructions
+     - Maintains retrieval precision
+
+3. Claude Large Context vs Retrieval-Only
+   - Default: RAG for enterprise knowledge base
+   - Skip RAG only if:
+     - Document < 100k tokens AND
+     - Question targets a single document
+
+4. Multi-Index Strategy
+   - Recommended: Domain-based indexes
+     - Cardiology
+     - Oncology
+     - Drug Interactions
+     - Internal Protocols
+   - Benefits: Faster retrieval, better relevance, easier governance
+
+5. Accuracy Strategy (>92%)
+   - Hybrid Retrieval:
+     - BM25 + Vector + Semantic Ranking
+   - Re-ranking:
+     - Retrieve Top 50 → Cross Encoder → Keep Top 10 → Send Top 5 to LLM
+   - Grounded Answers:
+     - Provide answer, citation, source document, timestamp
+
+6. Latency Strategy (<3 seconds)
+   - Parallel pipeline: Domain Router → Retrieval → Re-ranking → LLM Generation
+   - Caching of frequently accessed queries
+   - Target timing:
+     - Query routing: 100 ms
+     - Hybrid search: 600 ms
+     - Re-ranking: 400 ms
+     - LLM generation: 1200 ms
+     - Total ≈ 2.3 sec
+
+Final Recommendation Summary:
+-----------------------------
+1. Azure AI Search Hybrid Retrieval → compliance & managed
+2. Chunk Size = 768 Tokens, 150-token overlap → preserves clinical context
+3. Default RAG architecture → skip only for small single-document queries
+4. Multi-Index Design → Cardiology, Oncology, Drug Interactions, Internal Protocols
+5. Hybrid Retrieval + Re-ranking → BM25 + Vector + Semantic Ranking
+6. Caching + Parallel Processing → achieve <3s latency
+7. Grounded Answers with Citations → ensure >92% accuracy and clinician trust
