@@ -1,0 +1,191 @@
+=================================================
+EXTENSION A — REAL RABBITMQ (CLOUDAMQP)
+=================================================
+
+                +------------------+
+                |  FastAPI Client  |
+                +--------+---------+
+                         |
+                         v
+                +------------------+
+                | POST /payments   |
+                | Producer         |
+                +--------+---------+
+                         |
+                         v
+                +------------------+
+                | RabbitMQ Queue   |
+                |    payments      |
+                +--------+---------+
+                         |
+                         v
+                +------------------+
+                | Consumer Worker  |
+                +--------+---------+
+                         |
+             +-----------+-----------+
+             |                       |
+             v                       v
+      Processing OK          Processing Failed
+             |                       |
+             v                       v
+       Payment Settled       Dead Letter Exchange
+                                     |
+                                     v
+                          +------------------+
+                          | payments.dlq     |
+                          +------------------+
+
+CloudAMQP Management UI
+        |
+        v
+Queue Monitoring & DLQ Inspection
+
+
+=================================================
+EXTENSION B — AZURE SERVICE BUS
+=================================================
+
+                +------------------+
+                |  FastAPI Client  |
+                +--------+---------+
+                         |
+                         v
+                +------------------+
+                | POST /payments   |
+                | Producer         |
+                +--------+---------+
+                         |
+                         v
+                +---------------------------+
+                | Azure Service Bus Queue   |
+                |        payments           |
+                +-------------+-------------+
+                              |
+                              v
+                    +------------------+
+                    | Consumer Worker  |
+                    +--------+---------+
+                             |
+                +------------+------------+
+                |                         |
+                v                         v
+         Processing OK             Processing Failed
+                |                         |
+                v                         v
+        Payment Settled        Built-in Dead Letter Queue
+                                         |
+                                         v
+                          payments/$DeadLetterQueue
+                                         |
+                                         v
+                              Replay / Reprocess
+
+
+=================================================
+EXTENSION C — PRIORITY QUEUE
+=================================================
+
+                +------------------+
+                | Payment Request  |
+                +--------+---------+
+                         |
+                         v
+             +--------------------------+
+             | Priority Assignment Rule |
+             +--------------------------+
+                         |
+        +----------------+----------------+
+        |                                 |
+ Amount <= £10,000              Amount > £10,000
+ Priority = 1                   Priority = 8
+        |                                 |
+        +----------------+----------------+
+                         |
+                         v
+              +-------------------+
+              | Priority Queue    |
+              |    (Max Heap)     |
+              +---------+---------+
+                        |
+                        v
+              +-------------------+
+              | Consumer Worker   |
+              +---------+---------+
+                        |
+                        v
+          Highest Priority First Processing
+
+Example Processing Order:
+
+1. ACC-2 (£20,000) Priority 8
+2. ACC-4 (£50,000) Priority 8
+3. ACC-3 (£1,500) Priority 1
+4. ACC-1 (£500) Priority 1
+5. ACC-5 (£300) Priority 1
+
+
+=================================================
+EXTENSION D — BACKGROUND WORKER + PROMETHEUS
+=================================================
+
+                    +------------------+
+                    | Payment Producer |
+                    +--------+---------+
+                             |
+                             v
+                    +------------------+
+                    | Queue Broker     |
+                    +--------+---------+
+                             |
+                             v
+                    +------------------+
+                    | Background Worker|
+                    |  (Async Task)    |
+                    +--------+---------+
+                             |
+               +-------------+-------------+
+               |                           |
+               v                           v
+         Processing OK             Processing Failed
+               |                           |
+               v                           v
+          Completed                 Dead Letter Queue
+                                            |
+                                            v
+                                  +------------------+
+                                  | Prometheus Gauge |
+                                  |    DLQ_DEPTH     |
+                                  +--------+---------+
+                                           |
+                                           v
+                                Alert Monitoring Loop
+                                           |
+                                           v
+                         DLQ > 10 messages for 30 sec
+                                           |
+                                           v
+                     CRITICAL ALERT LOG ENTRY
+
+
+=================================================
+COMBINED EVOLUTION OF EXTENSIONS
+=================================================
+
+Extension A:
+FastAPI -> RabbitMQ -> Worker -> DLQ
+
+Extension B:
+FastAPI -> Azure Service Bus -> Worker -> Built-in DLQ
+
+Extension C:
+FastAPI -> Priority Queue -> Priority Worker
+
+Extension D:
+FastAPI -> Queue -> Background Worker -> DLQ
+                                      |
+                                      v
+                              Prometheus Gauge
+                                      |
+                                      v
+                               Alerting System
