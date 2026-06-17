@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1BvWB1sAM93OpjHExP_0W6sYnIeVrdcgO
 """
 
-!pip install -q langchain rouge-score pandas scikit-learn
+# !pip install -q langchain rouge-score pandas scikit-learn
 
 from langchain_core.prompts import PromptTemplate, FewShotPromptTemplate
 from rouge_score import rouge_scorer
