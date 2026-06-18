@@ -1,0 +1,6 @@
+# Return Decision: Jacket with Broken Zipper
+
+**Recommendation: Accept the return.** The 47-day timing is largely a red herring here — this isn't buyer's remorse against the 45-day window, it's a product defect (a zipper failing on day 44 is a quality issue, not a change of mind), and the failure itself occurred *within* policy; only the report was delayed, by a plausible reason. The missing receipt is a non-issue because the order is verified in your system, so there's no fraud or proof-of-purchase concern. Against that, weigh the relationship: a 6-year customer with 23 orders represents substantial lifetime value, and denying a two-day-late claim on a defective item is exactly the kind of rigid call that converts a loyal advocate into a detractor — the goodwill cost dwarfs the cost of one jacket. The cleanest approach is to grant it as a defect/warranty exception rather than a standard policy return, which lets you say yes generously while making clear the 45-day rule still stands, so you're not signaling to others that the deadline is negotiable.
+
+---
+*Suggested next steps: confirm whether you'd prefer to refund, replace, or repair the jacket; and consider noting the exception on the customer's record so the goodwill gesture is visible if the case comes up again.*
