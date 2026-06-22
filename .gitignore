@@ -4,3 +4,6 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .env
+Day 16/planner_multi_agent/.venv_planner/
+Day 17/yt_video_emotion_analysis/.venv/
+Day 17/yt_video_emotion_analysis/.venv_day17/

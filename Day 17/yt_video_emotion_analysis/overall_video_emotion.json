@@ -1,0 +1,14 @@
+{
+    "video_source": "input_video.mp4",
+    "total_faces_analyzed": 18,
+    "overall_dominant_emotion": "happy",
+    "overall_emotion_percentages": {
+        "angry": 9.06,
+        "disgust": 0.17,
+        "fear": 19.28,
+        "happy": 35.78,
+        "sad": 10.67,
+        "surprise": 7.28,
+        "neutral": 17.5
+    }
+}
