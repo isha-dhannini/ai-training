@@ -1,0 +1,42 @@
+Scenario 2: ShopIQ — Personalized product recommendation email
+
+Choice:
+Single-agent architecture
+
+Final justification:
+I would choose a single-agent architecture for ShopIQ’s personalized recommendation email workflow because this is a shared-context batch processing problem rather than a collaborative multi-agent problem. For each user, the system must pull 6 months of purchase and browse history, run the recommendation model, apply business rules, generate a personalized intro paragraph, and assemble the final email HTML within 3 seconds. All of these steps operate on the same user context object, so using multiple autonomous agents would introduce unnecessary coordination and data handoff overhead. A single recommendation orchestration agent can fetch the user data once, construct one shared user context, and then invoke the recommendation model, business-rule filtering, intro generation, and HTML assembly in a controlled pipeline. This keeps the workflow simpler, reduces context duplication, improves consistency across outputs, and is easier to optimize for large-scale nightly batch execution across 4 million users.
+
+Proposed design:
+Use one central Recommendation Email Agent / Orchestrator for each user in the nightly batch pipeline. When a user record is picked up, the service first gathers the user’s 6-month browse history, purchase history, profile signals, and catalog metadata to build a shared user context object. From this common context, it invokes the collaborative-filtering model to generate top candidate products, then applies business rules to remove out-of-stock items and recently purchased products. After the filtered product list is finalized, the same agent generates a short personalized intro paragraph using the user’s interests and recent activity, and then passes the intro plus selected products into an Email Assembly module to render the final HTML email. This single-agent design avoids unnecessary inter-agent communication, keeps all user-level logic in one place, and supports efficient large-scale batch execution with per-user parallelism across the nightly 4 million-user run.
+
+Tentative block diagram:
+[Nightly Batch Scheduler]
+          |
+          v
+[Recommendation Email Agent / Orchestrator]
+  - Load 6-month purchase history
+  - Load 6-month browse history
+  - Build shared user context
+          |
+          v
+[Collaborative Filtering Model]
+  Generate top-10 recommendation candidates
+          |
+          v
+[Business Rules Filter]
+  - Remove out-of-stock items
+  - Remove recently purchased items
+          |
+          v
+[Personalized Intro Generator]
+  Write short user-specific intro paragraph
+          |
+          v
+[Email HTML Assembler]
+  Combine intro + recommended products + template
+          |
+          v
+[Final Personalized Email Output]
+          |
+          v
+[Email Delivery Queue / Send Service]

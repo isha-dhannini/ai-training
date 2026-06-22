@@ -1,0 +1,37 @@
+Scenario 1: FinSecure Bank — Real-time transaction fraud screening
+
+Choice:
+Single-agent architecture
+
+Final justification:
+I would choose a single-agent architecture for this fraud-screening system because the problem is primarily a high-throughput, low-latency execution workflow rather than a collaborative reasoning workflow. The bank must process 2 million transactions per second and return a fraud decision within a strict p99 latency SLA of less than 80 ms. In this case, the rules engine, risk-score model, and velocity lookup all use the same transaction context and are stateless checks, so there is no strong need to split the work across multiple autonomous agents. A single fraud-screening agent can receive the transaction once, build the shared context once, execute all three checks in parallel, and aggregate the results into one final decision. This avoids the coordination, communication, and orchestration overhead that a multi-agent system would introduce, making the design faster, simpler, and more reliable for real-time authorization workloads.
+
+Proposed design:
+Use one central Fraud Screening Agent / Orchestrator Service in front of the authorization gateway. When a transaction arrives, the service constructs a shared transaction context containing card details, account details, merchant information, amount, timestamp, location, and channel metadata. From this common context, it triggers three parallel stateless checks: a Rules Engine check for known fraud rules and policy violations, a Risk Scoring Model for ML-based fraud probability estimation, and a Velocity Lookup to check how many transactions the card has made in the last 60 seconds. The outputs of these three checks are collected by a Decision Aggregator inside the same service, which applies final decision logic such as approve, decline, or send for review. This single-agent design minimizes service hops, reduces latency overhead, and is easier to scale horizontally for very high transaction volumes.
+
+Tentative block diagram:
+[Card Transaction Request]
+          |
+          v
+[Single Fraud Screening Agent / Orchestrator]
+  - Build shared transaction context
+  - Trigger all fraud checks in parallel
+          |
+          +-------------------+-------------------+
+          |                   |                   |
+          v                   v                   v
+   [Rules Engine]      [Risk Score Model]   [Velocity Lookup]
+   Stateless check     Stateless scoring    Last 60 sec count
+          \                   |                   /
+           \                  |                  /
+            +-----------------+-----------------+
+                              |
+                              v
+                   [Decision Aggregator]
+          Combine rule result + risk score + velocity
+                              |
+                              v
+               [Approve / Decline / Review]
+                              |
+                              v
+               [Authorization Gateway Response]

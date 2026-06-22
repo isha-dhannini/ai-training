@@ -1,0 +1,50 @@
+Scenario 4: ContractIQ — M&A due diligence on 800 contracts
+
+Choice:
+Multi-agent architecture
+
+Final justification:
+I would choose a multi-agent architecture for ContractIQ because this workflow contains two very different phases: a massively parallel document-level extraction phase and a cross-document synthesis phase that requires reasoning across the full contract set. At the beginning, each of the 800 contracts can be processed independently to extract obligations, risk clauses, and key commercial terms, which makes the workload highly parallelisable. However, the later stages are not independent: the system must compare extracted clauses against jurisdiction-specific regulatory checklists, identify inter-contract dependencies such as change-of-control clauses that cascade across suppliers or employment agreements, and then synthesize all findings into an executive risk summary with a heat map. A multi-agent architecture is better suited because it can use many document-analysis agents in parallel for first-pass extraction, followed by specialized compliance and cross-document synthesis agents for dependency analysis and portfolio-level risk reporting. This design fits the 4-hour SLA by scaling out the extraction workload while still supporting higher-order reasoning at the final synthesis stage.
+
+Proposed design:
+Use a supervisor-led multi-agent workflow with two layers. In the first layer, a Document Ingestion / Orchestration Agent distributes the 800 contracts across multiple Contract Extraction Agents running in parallel. Each extraction agent processes one contract at a time, identifies obligations, key dates, termination clauses, indemnities, change-of-control clauses, employment liabilities, and other risk-relevant provisions, and outputs a structured contract summary. These structured outputs are then passed to a Regulatory Cross-Reference Agent that maps the extracted clauses against the jurisdiction-specific due-diligence checklist. In parallel or immediately after, a Dependency Analysis Agent examines the structured outputs across all contracts to identify inter-contract relationships, cascading risks, and portfolio-wide issues such as linked supplier obligations or change-of-control triggers. Finally, a Synthesis / Executive Summary Agent aggregates the outputs from the extraction, compliance, and dependency stages and produces a red/amber/green risk heat map plus a final executive due-diligence summary. This architecture combines parallelism where the documents are independent with specialized synthesis where the contracts become interdependent.
+
+Tentative block diagram:
+[800 Uploaded Contracts]
+          |
+          v
+[Supervisor / Workflow Orchestrator]
+          |
+          v
+[Parallel Contract Distribution Layer]
+          |
+          +---------------------------------------------------+
+          |                     |                    |         |
+          v                     v                    v         v
+[Contract Extraction]   [Contract Extraction] [Contract Extraction] ...
+[Agent - Doc 1]         [Agent - Doc 2]       [Agent - Doc N]
+  - extract obligations    - extract clauses     - extract risks
+  - extract risk clauses   - extract dates       - extract key terms
+          |                     |                    |
+          +---------------------+--------------------+
+                                |
+                                v
+                [Structured Clause / Risk Outputs]
+                                |
+               +----------------+------------------+
+               |                                   |
+               v                                   v
+[Regulatory Cross-Reference Agent]      [Dependency Analysis Agent]
+- map clauses to jurisdiction rules     - detect inter-contract links
+- flag compliance gaps                  - detect cascading change-of-control risk
+               |                                   |
+               +----------------+------------------+
+                                |
+                                v
+                  [Synthesis / Executive Summary Agent]
+               - aggregate risks across all contracts
+               - generate red/amber/green heat map
+               - produce executive due diligence summary
+                                |
+                                v
+                 [Final M&A Risk Report + Heat Map]

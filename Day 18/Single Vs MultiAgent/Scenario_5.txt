@@ -1,0 +1,49 @@
+Scenario 5: CloudOps Sentinel — Incident triage and auto-remediation
+
+Choice:
+Multi-agent architecture
+
+Final justification:
+I would choose a multi-agent architecture for CloudOps Sentinel because the incident workflow naturally splits into multiple concurrent investigations across different operational systems, followed by a gated remediation step and a final communication step. The system must simultaneously inspect Datadog metrics, GitHub Actions deployment logs, and AWS RDS slow-query logs, which are different tool surfaces with different data formats and investigation logic. After these parallel investigations, the findings must be combined into a root-cause assessment and confidence score before any remediation action is taken. This is especially important because rollback or pod restart may require a human-in-the-loop approval gate when confidence is below 80%. A multi-agent design is therefore a better fit: separate specialized agents can investigate metrics, deployments, and database behavior in parallel, while a supervisor agent aggregates evidence, decides whether to auto-remediate or request human approval, and then triggers a communication agent to publish the structured RCA to Slack. Compared with a single-agent design, this approach gives clearer separation of tool responsibilities, better concurrency, safer gated execution, and more maintainable incident workflows.
+
+Proposed design:
+Use a Supervisor / Incident Commander Agent to orchestrate the full triage and remediation flow. When an alert arrives, the supervisor launches three specialized sub-agents in parallel: a Metrics Investigation Agent that queries Datadog to identify degraded pods and latency spikes, a Deployment Investigation Agent that checks recent GitHub Actions deployment logs for failed or suspicious releases, and a Database Investigation Agent that scans AWS RDS slow-query logs for DB-side latency causes. The outputs of these three agents are passed back to the supervisor, which correlates the evidence and computes a root-cause hypothesis plus confidence score. If the confidence is at least 80%, the supervisor invokes a Remediation Agent to execute an approved rollback or pod restart through kubectl. If the confidence is below 80%, the workflow pauses for human approval before remediation. Once remediation or escalation is complete, a Communication / RCA Agent generates a structured incident summary and posts it to the #incidents Slack channel. This design matches the concurrent investigation pattern, the human approval gate, and the need for controlled action execution across multiple DevOps systems.
+
+Tentative block diagram:
+[Latency Alert: p99 API latency spike on payments service]
+                          |
+                          v
+             [Supervisor / Incident Commander Agent]
+                          |
+        +-----------------+-----------------+-----------------+
+        |                 |                 |                 |
+        v                 v                 v
+[Metrics Investigation] [Deployment Investigation] [DB Investigation]
+       Agent                    Agent                    Agent
+- query Datadog          - query GitHub Actions   - query AWS RDS slow logs
+- identify bad pods      - inspect recent deploys - find slow queries / DB bottlenecks
+- isolate latency scope  - detect release issues  - identify DB-side root causes
+        |                 |                 |
+        +-----------------+-----------------+
+                          |
+                          v
+        [Evidence Aggregation + Confidence Scoring]
+                          |
+            +-------------+--------------+
+            |                            |
+   confidence >= 80%             confidence < 80%
+            |                            |
+            v                            v
+ [Remediation Agent]          [Human Approval Gate]
+ - rollback deployment        - operator reviews evidence
+ - restart pods if needed     - approve / reject remediation
+            |                            |
+            +-------------+--------------+
+                          |
+                          v
+              [Communication / RCA Agent]
+      - draft structured incident summary
+      - post RCA to #incidents Slack channel
+                          |
+                          v
+              [Incident closed / escalated]

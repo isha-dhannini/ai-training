@@ -1,0 +1,54 @@
+Scenario 3: Apollo Diagnostics — Automated radiology report + care pathway
+
+Choice:
+Multi-agent architecture
+
+Final justification:
+I would choose a multi-agent architecture for Apollo Diagnostics because this workflow is not a simple shared-context execution pipeline; it is a multi-stage clinical workflow spanning four distinct domains, each with its own tools, expertise, and validation requirements. The radiology interpretation, contraindication checking against medication history, follow-up scheduling in the EMR, and drafting of GP/patient communications are fundamentally different tasks that require different tool access, decision logic, and failure handling. A multi-agent design allows each stage to be handled by a specialized agent: one for imaging/report generation, one for clinical decision support and medication safety checks, one for operational scheduling in the EMR, and one for clinical communication drafting. This is especially appropriate because the workflow is sequential with gated handoffs, meaning the output of one stage must be validated before the next stage begins. Compared with a single-agent system, a multi-agent architecture provides clearer separation of responsibilities, safer control over domain-specific tools, better auditability, and easier handling of failures or escalations at each step in a healthcare environment.
+
+Proposed design:
+Use a Supervisor / Workflow Orchestrator Agent to control the end-to-end chest CT workflow and route the case through four specialized agents in sequence. When a CT scan arrives, the Imaging Report Agent uses the radiology-grade model to analyze the scan and draft the findings report. Once that output is validated, the Clinical Decision Support Agent receives the findings plus patient medication history and checks for contraindications, interactions, and safety issues related to the recommended next steps. After clinical validation, the Scheduling Agent uses EMR integration tools to book the recommended follow-up action such as a biopsy or PET scan. Finally, the Communication Agent uses the confirmed findings, safety checks, and scheduled plan to draft both a GP referral/update letter and a patient-facing summary. At each stage, the orchestrator enforces gating, error handling, and escalation rules so that failures in one specialized domain do not silently propagate into the next stage.
+
+Tentative block diagram:
+[Chest CT Scan + Patient Record Arrives]
+                 |
+                 v
+     [Supervisor / Workflow Orchestrator]
+                 |
+                 v
+      [Agent 1: Imaging Report Agent]
+  - Run radiology-grade CT interpretation model
+  - Draft findings report
+                 |
+                 v
+        [Gate 1: Clinical validation]
+   If findings acceptable, continue; else escalate
+                 |
+                 v
+ [Agent 2: Clinical Decision Support Agent]
+  - Read findings report
+  - Check medication history
+  - Detect contraindications / safety issues
+                 |
+                 v
+        [Gate 2: Safety validation]
+   If clinically safe, continue; else escalate
+                 |
+                 v
+       [Agent 3: Scheduling Agent]
+  - Book biopsy / PET / follow-up in EMR
+  - Confirm appointment workflow
+                 |
+                 v
+      [Gate 3: Scheduling confirmation]
+   If booking successful, continue; else retry/escalate
+                 |
+                 v
+     [Agent 4: Communication Agent]
+  - Draft GP letter
+  - Draft patient-facing summary
+                 |
+                 v
+        [Final care pathway package]
+  Findings report + safety checks + follow-up booking
+  + GP communication + patient summary
