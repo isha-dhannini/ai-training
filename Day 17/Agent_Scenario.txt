@@ -1,0 +1,48 @@
+FRAMEWORK SELECTION SCENARIOS FOR AGENTIC AI SYSTEMS
+
+
+# Scenario 1 — The understaffed marketing team
+
+A mid-size e-commerce company’s marketing operations team wants to build a customer-support triage bot that routes incoming messages such as refund requests, shipping issues, and product-related questions. There is no engineering team assigned to help them. They need a working version by this week, and the operations staff should be able to adjust the routing rules later without writing any code.
+
+### Suitable Framework: Langflow
+
+**Why:** Langflow is a low-code / no-code visual workflow builder that allows non-technical users to create, manage, and modify routing logic without programming.
+
+---
+
+# Scenario 2 — The research-brief assembly line
+
+A consulting firm wants to automate the creation of market-research briefs. The workflow is structured and repeatable: a researcher gathers sources, an analyst synthesizes the findings, a writer drafts the report, and an editor polishes the final version. The team has Python developers, but they do not want to manually build orchestration logic. They want a framework where they can define roles and responsibilities clearly and deploy quickly.
+
+### Suitable Framework: CrewAI
+
+**Why:** CrewAI is designed for role-based multi-agent systems, where specialized agents such as Researcher, Analyst, Writer, and Editor can work in a sequential workflow with built-in task orchestration.
+
+---
+
+# Scenario 3 — The self-debugging data analyst
+
+A fintech R&D team is building an experimental AI system that writes Python code for data analysis, executes it, reads the resulting errors, and rewrites the code until it works correctly. They want a coder agent and a critic agent that can challenge each other’s output. The number of back-and-forth exchanges is not fixed in advance, and the system needs a sandbox environment to run the generated code.
+
+### Suitable Framework: AutoGen
+
+**Why:** AutoGen supports autonomous multi-agent conversations with dynamic turn-taking, making it a strong fit for iterative coder–critic workflows that also require code execution.
+
+---
+
+# Scenario 4 — The regulated enterprise platform
+
+A healthcare enterprise is building a production-grade clinical knowledge assistant. The system must support RAG across multiple internal data sources, custom branching logic, human approval checkpoints before answers are finalized, pause/resume support for long-running workflows, and full tracing for compliance and audit purposes. A dedicated engineering team is responsible for building and maintaining the system.
+
+### Suitable Framework: LangGraph
+
+**Why:** LangGraph is built for production-grade, stateful agent workflows and supports branching logic, checkpointing, human-in-the-loop approval steps, and observability features needed for enterprise and regulated environments.
+
+
+
+SUMMARY: 
+Understaffed marketing team -> Langflow
+Research brief assembly line -> CrewAI
+Self-debugging data analyst -> AutoGen
+Regulated enterprise platform -> LangGraph
