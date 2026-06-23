@@ -1,0 +1,88 @@
+1) INSURANCE – Claims adjudication
+Chosen pattern: GraphFlow
+Runner-up: Selector
+
+Why:
+The claim requires three independent checks — fraud screening, policy coverage, and medical coding review — that can run in parallel. After all three are complete, a final decision agent combines the results and decides approve or deny. This is a structured workflow with parallel branches followed by a merge step, which fits GraphFlow best.
+
+Block diagram:
+
+New Claim
+   |
+   +----------------+----------------+----------------+
+   |                |                |
+   v                v                v
+Fraud Check    Coverage Check   Medical Coding Review
+   |                |                |
+   +----------------+----------------+
+                    |
+                    v
+           Final Decision Agent
+                    |
+                    v
+              Approve / Deny
+
+
+2) MANUFACTURING – RFP response builder
+Chosen pattern: GraphFlow
+Runner-up: Round-robin
+
+Why:
+The response is built section by section in a defined order — technical, pricing, compliance, and timeline. After assembly, a reviewer checks the full draft and may send specific sections back for rework before final sign-off. Because the workflow has ordered steps plus review loops back to selected sections, GraphFlow fits best.
+
+Block diagram:
+
+Technical Section
+      |
+      v
+Pricing Section
+      |
+      v
+Compliance Section
+      |
+      v
+Timeline Section
+      |
+      v
+Assemble Draft
+      |
+      v
+Reviewer
+   /   |   \
+  /    |    \
+fix tech  fix pricing  fix compliance / timeline
+  \      |      /
+   \     |     /
+      back to reviewer
+            |
+            v
+      Final Sign-off
+
+
+3) RETAIL – Buyer’s research assistant
+Chosen pattern: Magentic
+Runner-up: Selector
+
+Why:
+The merchandising team’s request is open-ended: find trending outdoor furniture materials and summarize supplier options. The subtasks are not fully known upfront and may require repeated web searches, supplier lookups, comparison, and refinement of results. Since the workflow is dynamic and tool-using rather than fixed in advance, Magentic is the best fit.
+
+Block diagram:
+
+Merchandising Request
+        |
+        v
+Magentic Research Agent
+        |
+   +----+----+------------------+
+   |         |                  |
+   v         v                  v
+Web Search  Trend Discovery   Supplier Lookup
+   \         |                 /
+    \        |                /
+     +-------+----------------+
+             |
+             v
+      Summarize Findings
+             |
+             v
+       Final Research Output
