@@ -1,0 +1,54 @@
+┌─────────────────────────────────────────────────────────────────────┐
+│                              USER / UI                             │
+│  "Why is TACOS rising?" / "Pause bad keywords" / "Restock risks?"  │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    MCP ORCHESTRATOR / AGENT LAYER                  │
+│                                                                     │
+│  1) Intent understanding                                            │
+│  2) Capability discovery across MCP servers                         │
+│  3) Plan retrieval + joins                                          │
+│  4) Synthesize analysis / recommendation                            │
+│  5) Route proposed writes through policy + approval                 │
+└───────────────┬───────────────────────┬───────────────────────┬─────┘
+                │                       │                       │
+                │                       │                       │
+                ▼                       ▼                       ▼
+     ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+     │ Policy Engine     │    │ Approval Service │    │ Audit / Logging  │
+     │ - read/write risk │    │ - human signoff  │    │ - tool traces    │
+     │ - PII rules       │    │ - spend actions  │    │ - before/after   │
+     │ - spend limits    │    │ - sensitive ops  │    │ - approvals      │
+     └─────────┬─────────┘    └─────────┬────────┘    └──────────────────┘
+               │                        │
+               └──────────────┬─────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        MCP SERVER BOUNDARIES                        │
+└─────────────────────────────────────────────────────────────────────┘
+
+Seller-controlled boundary
+──────────────────────────────────────────────────────────────────────
+   ┌─────────────────────────┐        ┌────────────────────────────┐
+   │ SP-API MCP Server       │        │ Cost / Margin MCP Server   │
+   │ - catalog/listings      │        │ - COGS                     │
+   │ - orders                │        │ - landed cost              │
+   │ - inventory/FBA         │        │ - contribution margin      │
+   │ - fees/settlements      │        │ - replenishment logic      │
+   └─────────────┬───────────┘        └──────────────┬─────────────┘
+                 │                                   │
+                 ▼                                   ▼
+         Seller Amazon data                  Seller internal systems
+         + marketplace ops                   + ERP / DB / spreadsheets
+
+Amazon-controlled boundary
+──────────────────────────────────────────────────────────────────────
+   ┌────────────────────────────────────────────────────────────────┐
+   │ Official Amazon Ads MCP Server                                │
+   │ - campaigns / ad groups / keywords                            │
+   │ - reports: spend, clicks, CPC, ACOS, attributed sales         │
+   │ - mutations: bid/budget/state changes (approval-gated)        │
+   └────────────────────────────────────────────────────────────────┘
