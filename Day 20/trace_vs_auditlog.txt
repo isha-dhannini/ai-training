@@ -1,0 +1,56 @@
+Trace vs Audit Log – Ticket Analysis
+
+Ticket 04 - Ticket Description: 
+You are reproducing a failing request in staging and need to determine precisely where the error occurred during execution.
+
+Suitable Option: Trace / Spans
+
+Explanation: 
+Traces and spans reveal the full execution path of a request, including service calls, dependencies, timing, and failure points. 
+This makes them the right tool for locating the exact component or function responsible for the error. 
+Audit logs are intended for recording business actions and decisions, not for step-by-step debugging of runtime failures.
+
+
+
+Ticket 05 - Ticket Description: 
+FinOps needs a live dashboard showing average token usage and cost per request, and sampling about 10% of traffic is acceptable.
+
+Suitable Option: Trace
+
+Explanation
+Trace data can capture request-level details such as token counts, latency, and model usage. 
+Because FinOps only needs aggregated token and cost metrics rather than a permanent record of every request, 
+sampled traces are sufficient and far more efficient than storing everything in an audit log.
+
+
+
+Ticket 06 - Ticket Description: 
+A high-stakes business decision must stay available and verifiable for years, even if someone with database write access later attempts to 
+alter the records.
+
+Suitable Option: Audit Log
+
+Explanation: 
+Audit logs are designed as durable, append-only records for compliance and governance. They preserve what action was taken, who took it, 
+and when it happened, making them suitable for legal review, accountability, and long-term verification.
+
+
+
+Ticket 08 - Ticket Description: 
+A guardrail blocked a suspicious transaction. Compliance needs a permanent record of the block, while the on-call team must investigate 
+why the guardrail fired.
+
+Suitable Option: Both – Trace / Spans + Audit Log
+
+Explanation
+- Audit Log provides the permanent compliance record showing that the transaction was blocked.
+- Trace / Spans provide the technical execution details needed to understand how the guardrail was evaluated and why it triggered.
+Using both covers the compliance requirement for long-term recordkeeping and the operational need for technical investigation.
+
+
+Summary
+
+Ticket 04 - Trace / Spans: best for debugging a failed request
+Ticket 05 - Trace suitable for sampled token and cost monitoring
+Ticket 06 - Audit Log: appropriate for immutable long-term decision records
+Ticket 08 - Both: combines compliance evidence with technical debugging support
