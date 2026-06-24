@@ -1,0 +1,5 @@
+flask
+requests
+flask-socketio
+python-socketio
+simple-websocket
